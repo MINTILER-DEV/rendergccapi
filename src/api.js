@@ -3,9 +3,10 @@ const bodyParser = require('body-parser');
 const fs = require('fs');
 const { exec } = require('child_process');
 const path = require('path');
-const { log } = require('console');
+const cors = require('cors'); // Import the cors package
 
 const app = express();
+app.use(cors()); // Enable CORS for all routes
 app.use(bodyParser.json());
 
 // Ensure the /cache directory exists
@@ -38,5 +39,3 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
-
-
