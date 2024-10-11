@@ -1,6 +1,6 @@
 {
     "name": "gccapi",
-    "version": "1.0.0.1",
+    "version": "1.0.1.2",
     "description": "A simple Node.js API to compile and run C code online using GCC",
     "main": "api.js",
     "scripts": {
@@ -8,7 +8,8 @@
     },
     "dependencies": {
         "express": "^4.17.1",
-        "body-parser": "^1.19.0"
+        "body-parser": "^1.19.0",
+        "cors": "^2.8.5"
     },
     "author": "Antonio",
     "license": "GPL-3.0"
