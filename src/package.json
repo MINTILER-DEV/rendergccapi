@@ -1,6 +1,6 @@
 {
     "name": "gccapi",
-    "version": "1.0.1.2",
+    "version": "2.0.1.3",
     "description": "A simple Node.js API to compile and run C code online using GCC",
     "main": "api.js",
     "scripts": {

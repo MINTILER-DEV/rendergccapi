@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs');
-const { exec } = require('child_process');
+const { exec, spawn } = require('child_process');
 const path = require('path');
 const cors = require('cors'); // Import the cors package
 
@@ -15,6 +15,8 @@ if (!fs.existsSync(cacheDir)) {
     fs.mkdirSync(cacheDir);
 }
 
+let currentProcess;
+
 // POST endpoint to accept code
 app.post('/compile', (req, res) => {
     const code = req.body.code;
@@ -24,14 +26,47 @@ app.post('/compile', (req, res) => {
     fs.writeFileSync(filename, code);
 
     // Compile the C file using GCC, and store the compiled binary in /cache
-    exec(`gcc ${filename} -o ${path.join(cacheDir, 'program')} && ${path.join(cacheDir, 'program')}`, (err, stdout, stderr) => {
+    exec(`gcc ${filename} -o ${path.join(cacheDir, 'program')}`, (err, stdout, stderr) => {
         if (err) {
             // Send back the compilation errors if any
             return res.status(400).send(stderr);
         }
-        // Send back the output of the program
-        res.send(stdout);
+
+        // Start the compiled program but don't send input yet
+        currentProcess = spawn(path.join(cacheDir, 'program'));
+
+        // Capture the program output
+        let output = '';
+        currentProcess.stdout.on('data', (data) => {
+            output += data.toString();
+        });
+
+        currentProcess.on('close', () => {
+            res.send(output); // Send the initial output
+        });
     });
+});
+
+// POST endpoint to handle input during program execution
+app.post('/execute', (req, res) => {
+    const input = req.body.input;
+
+    if (currentProcess) {
+        // Send input to the running process
+        currentProcess.stdin.write(input + '\n');
+
+        // Capture the response from the program
+        let output = '';
+        currentProcess.stdout.on('data', (data) => {
+            output += data.toString();
+        });
+
+        currentProcess.on('close', () => {
+            res.send(output);
+        });
+    } else {
+        res.status(400).send('No process running.');
+    }
 });
 
 // Start the server
